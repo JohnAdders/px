@@ -922,10 +922,19 @@ WINHTTP_ACCESS_TYPE_NAMED_PROXY = 3
 WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY = 4
 
 def winhttp_find_proxy_for_url(url, autodetect=False, pac_url=None, autologon=True):
+    access_type = WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY
+    asynch_flag = WINHTTP_FLAG_ASYNC
+    win_ver = sys.getwindowsversion()
+    
+    # fall back to old api values if windows version < 8.1
+    if(win_ver.major < 8 or (win_ver.major == 8 and win_ver.minor < 1)):
+        access_type = WINHTTP_ACCESS_TYPE_DEFAULT_PROXY
+        asynch_flag = 0
+        
     hInternet = ctypes.windll.winhttp.WinHttpOpen(
         ctypes.wintypes.LPCWSTR("Px"),
-        WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_NO_PROXY_NAME,
-        WINHTTP_NO_PROXY_BYPASS, WINHTTP_FLAG_ASYNC)
+        access_type, WINHTTP_NO_PROXY_NAME,
+        WINHTTP_NO_PROXY_BYPASS, asynch_flag)
     if not hInternet:
         dprint("WinHttpOpen failed: " + str(ctypes.GetLastError()))
         return ""
@@ -1043,9 +1052,6 @@ def find_proxy_for_url(url):
             pac = "http://%s:%d/PACFile.pac" % (host, port)
             dprint("PAC URL is local: " + pac)
         proxy_str = winhttp_find_proxy_for_url(url, pac_url=pac)
-
-    # return the first one if we get a list back from the pac
-    proxy_str = proxy_str.split(';')[0]
 
     dprint("Proxy found: " + proxy_str)
     return proxy_str
