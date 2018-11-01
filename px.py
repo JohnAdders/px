@@ -1505,8 +1505,8 @@ def parse_config():
 
     cfg_int_init("settings", "workers", "2")
     cfg_int_init("settings", "threads", "5")
-    cfg_int_init("settings", "idle", "30")
-    cfg_float_init("settings", "socktimeout", "20.0")
+    cfg_int_init("settings", "idle", "90")
+    cfg_float_init("settings", "socktimeout", "90.0")
     cfg_int_init("settings", "proxyreload", "60")
     cfg_int_init("settings", "foreground", "0")
 
